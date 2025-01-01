@@ -1,5 +1,6 @@
 package com.example.fintrack.ui.sections
 
+import android.graphics.Color
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -13,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -21,18 +23,32 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import com.example.fintrack.data.getChartDataForPeriod
+import com.example.fintrack.ui.utils.Constants.Dimensions.ALPHA_DRAW_LINE
+import com.example.fintrack.ui.utils.Constants.Dimensions.ALPHA_SHADOW
 import com.example.fintrack.ui.utils.Constants.Dimensions.CARD_SIZE
 import com.example.fintrack.ui.utils.Constants.Dimensions.CUSTOM_FONT_MEDIUM_SIZE
 import com.example.fintrack.ui.utils.Constants.Dimensions.CUSTOM_FONT_SMALL_SIZE
+import com.example.fintrack.ui.utils.Constants.Dimensions.HORIZONTAL_CELLS
 import com.example.fintrack.ui.utils.Constants.Dimensions.LABEL_HORIZONTAL_PADDING
 import com.example.fintrack.ui.utils.Constants.Dimensions.LABEL_VERTICAL_PADDING
+import com.example.fintrack.ui.utils.Constants.Dimensions.ONE
 import com.example.fintrack.ui.utils.Constants.Dimensions.RECT_CORNER_RADIUS
+import com.example.fintrack.ui.utils.Constants.Dimensions.RECT_HEIGHT
+import com.example.fintrack.ui.utils.Constants.Dimensions.RECT_LEFT
+import com.example.fintrack.ui.utils.Constants.Dimensions.RECT_TOP
 import com.example.fintrack.ui.utils.Constants.Dimensions.RECT_TOP_OFFSET
+import com.example.fintrack.ui.utils.Constants.Dimensions.RECT_WIDTH
 import com.example.fintrack.ui.utils.Constants.Dimensions.ROUNDED_CORNER
 import com.example.fintrack.ui.utils.Constants.Dimensions.SELECTED_RECT_HEIGHT
 import com.example.fintrack.ui.utils.Constants.Dimensions.SELECTED_RECT_WIDTH
+import com.example.fintrack.ui.utils.Constants.Dimensions.SHADOW_HEIGHT
+import com.example.fintrack.ui.utils.Constants.Dimensions.SHADOW_RADIUS
+import com.example.fintrack.ui.utils.Constants.Dimensions.START_OFFSET
 import com.example.fintrack.ui.utils.Constants.Dimensions.STROKE_DRAW
 import com.example.fintrack.ui.utils.Constants.Dimensions.STROKE_WIDTH
+import com.example.fintrack.ui.utils.Constants.Dimensions.TWO
+import com.example.fintrack.ui.utils.Constants.Dimensions.VERTICAL_CELLS
+import com.example.fintrack.ui.utils.Constants.Dimensions.ZERO
 import com.example.fintrack.ui.utils.Constants.Texts.CHART_LABELS_HORIZONTAL
 import com.example.fintrack.ui.utils.Constants.Texts.CHART_LABELS_VERTICAL
 import com.example.fintrack.ui.utils.Constants.Texts.SELECTED_PERIOD
@@ -43,7 +59,34 @@ fun ChartSection() {
     val chartData = getChartDataForPeriod()
     val colors = MaterialTheme.colorScheme
 
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(CARD_SIZE.dp)
+            .drawBehind {
+                val shadowColor = Color.argb(ALPHA_SHADOW, ZERO, ZERO, ZERO)
+                val paint = Paint().apply {
+                    color = Color.TRANSPARENT
+                    setShadowLayer(SHADOW_RADIUS, START_OFFSET, SHADOW_HEIGHT, shadowColor)
+                }
+                drawContext.canvas.nativeCanvas.apply {
+                    save()
+                    translate(START_OFFSET, size.height)
+                    drawRect(
+                        START_OFFSET,
+                        START_OFFSET,
+                        size.width,
+                        SHADOW_HEIGHT,
+                        paint
+                    )
+                    restore()
+                }
+            }
+            .background(
+                color = colors.primary,
+                shape = RoundedCornerShape(ROUNDED_CORNER.dp)
+            )
+    ) {
         Box(
             modifier = Modifier
                 .height(CARD_SIZE.dp)
@@ -57,13 +100,13 @@ fun ChartSection() {
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 CHART_LABELS_VERTICAL.forEachIndexed { index, label ->
-                    val y = size.height - (size.height / 5 * (index + 1))
+                    val y = size.height - (size.height / VERTICAL_CELLS * (index + ONE))
                     drawContext.canvas.nativeCanvas.drawText(
                         label,
                         LABEL_HORIZONTAL_PADDING.dp.toPx(),
                         y,
                         Paint().apply {
-                            color = android.graphics.Color.WHITE
+                            color = Color.WHITE
                             textSize = CUSTOM_FONT_MEDIUM_SIZE
                             textAlign = Paint.Align.LEFT
                         }
@@ -71,13 +114,13 @@ fun ChartSection() {
                 }
 
                 CHART_LABELS_HORIZONTAL.forEachIndexed { index, period ->
-                    val x = size.width / 7 * (index + 1)
+                    val x = size.width / HORIZONTAL_CELLS * (index + ONE)
                     val textY = size.height - LABEL_VERTICAL_PADDING.dp.toPx()
 
                     if (period == SELECTED_PERIOD) {
                         val rectWidth = SELECTED_RECT_WIDTH.dp.toPx()
                         val rectHeight = SELECTED_RECT_HEIGHT.dp.toPx()
-                        val rectLeft = x - rectWidth / 2
+                        val rectLeft = x - rectWidth / TWO
                         val rectTop = textY - rectHeight + RECT_TOP_OFFSET.dp.toPx() - RECT_CORNER_RADIUS.dp.toPx()
 
                         drawRoundRect(
@@ -89,10 +132,10 @@ fun ChartSection() {
 
                         drawContext.canvas.nativeCanvas.drawText(
                             SELECTED_PERIOD,
-                            rectLeft + rectWidth / 2,
-                            rectTop + rectHeight / 2 - (Paint().descent() + Paint().ascent()),
+                            rectLeft + rectWidth / TWO,
+                            rectTop + rectHeight / TWO - (Paint().descent() + Paint().ascent()),
                             Paint().apply {
-                                color = android.graphics.Color.WHITE
+                                color = Color.WHITE
                                 textSize = CUSTOM_FONT_MEDIUM_SIZE
                                 textAlign = Paint.Align.CENTER
                             }
@@ -104,7 +147,7 @@ fun ChartSection() {
                             x,
                             textY,
                             Paint().apply {
-                                color = android.graphics.Color.WHITE
+                                color = Color.WHITE
                                 textSize = CUSTOM_FONT_MEDIUM_SIZE
                                 textAlign = Paint.Align.CENTER
                             }
@@ -112,21 +155,21 @@ fun ChartSection() {
                     }
                 }
 
-                for (i in 0..7) {
-                    val x = size.width / 7 * i
+                for (i in ZERO..HORIZONTAL_CELLS) {
+                    val x = size.width / HORIZONTAL_CELLS * i
                     drawLine(
-                        color = colors.background.copy(alpha = 0.3f),
-                        start = Offset(x, 0f),
+                        color = colors.background.copy(alpha = ALPHA_DRAW_LINE),
+                        start = Offset(x, START_OFFSET),
                         end = Offset(x, size.height),
                         strokeWidth = STROKE_WIDTH
                     )
                 }
 
-                for (i in 0..5) {
-                    val y = size.height / 5 * i
+                for (i in ZERO..VERTICAL_CELLS) {
+                    val y = size.height / VERTICAL_CELLS * i
                     drawLine(
-                        color = colors.background.copy(alpha = 0.3f),
-                        start = Offset(0f, y),
+                        color = colors.background.copy(alpha = ALPHA_DRAW_LINE),
+                        start = Offset(START_OFFSET, y),
                         end = Offset(size.width, y),
                         strokeWidth = STROKE_WIDTH
                     )
@@ -135,14 +178,14 @@ fun ChartSection() {
                 if (chartData.points.isNotEmpty()) {
                     val path = Path().apply {
                         moveTo(
-                            chartData.points[0].x * size.width,
-                            chartData.points[0].y * size.height
+                            chartData.points[ZERO].x * size.width,
+                            chartData.points[ZERO].y * size.height
                         )
-                        for (i in 1 until chartData.points.size) {
-                            val prev = chartData.points[i - 1]
+                        for (i in ONE until chartData.points.size) {
+                            val prev = chartData.points[i - ONE]
                             val curr = chartData.points[i]
-                            val midPointX = (prev.x + curr.x) / 2
-                            val midPointY = (prev.y + curr.y) / 2
+                            val midPointX = (prev.x + curr.x) / TWO
+                            val midPointY = (prev.y + curr.y) / TWO
                             quadraticTo(
                                 prev.x * size.width,
                                 prev.y * size.height,
@@ -166,7 +209,7 @@ fun ChartSection() {
                 chartData.highlightedPoint?.let { hp ->
                     drawCircle(
                         color = colors.error,
-                        radius = 8.dp.toPx(),
+                        radius = RECT_TOP.dp.toPx(),
                         center = Offset(hp.x * size.width, hp.y * size.height)
                     )
 
@@ -176,10 +219,10 @@ fun ChartSection() {
                         center = Offset(hp.x * size.width, hp.y * size.height)
                     )
 
-                    val rectWidth = 30.dp.toPx()
-                    val rectHeight = 16.dp.toPx()
-                    val rectLeft = hp.x * size.width + 12.dp.toPx()
-                    val rectTop = hp.y * size.height - rectHeight - 8.dp.toPx()
+                    val rectWidth = RECT_WIDTH.dp.toPx()
+                    val rectHeight = RECT_HEIGHT.dp.toPx()
+                    val rectLeft = hp.x * size.width + RECT_LEFT.dp.toPx()
+                    val rectTop = hp.y * size.height - rectHeight - RECT_TOP.dp.toPx()
 
                     drawRoundRect(
                         color = colors.error,
@@ -190,10 +233,10 @@ fun ChartSection() {
 
                     drawContext.canvas.nativeCanvas.drawText(
                         "${chartData.highlightedValue}",
-                        rectLeft + rectWidth / 2,
-                        rectTop + rectHeight / 2 - (Paint().descent() + Paint().ascent()) / 2,
+                        rectLeft + rectWidth / TWO,
+                        rectTop + rectHeight / TWO - (Paint().descent() + Paint().ascent()) / TWO,
                         Paint().apply {
-                            color = android.graphics.Color.WHITE
+                            color = Color.WHITE
                             textSize = CUSTOM_FONT_SMALL_SIZE
                             textAlign = Paint.Align.CENTER
                         }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -35,7 +36,7 @@ fun RecipientsSection() {
             text = RECIPIENTS_TITLE,
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = spacing.small)
+            modifier = Modifier.padding(bottom = spacing.medium) .offset(y = spacing.small)
         )
         Spacer(modifier = Modifier.height(spacing.small))
         Row(
@@ -67,7 +68,7 @@ fun RecipientsSection() {
                     modifier = Modifier
                         .size(AVATAR_SIZE.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant),
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

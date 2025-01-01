@@ -27,6 +27,7 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Color.Black,
     onSurface = Color.DarkGray,
     onSurfaceVariant = Color.Gray,
+    secondaryContainer = Color.LightGray,
     error = Color.Red
 )
 
@@ -54,9 +55,11 @@ object MaterialThemeSpacing {
 }
 
 class Spacing {
-    val extraSmall = 4.dp
+    val extraSmall = 6.dp
     val small = 8.dp
+    val default = 12.dp
     val medium = 16.dp
+    val large = 20.dp
 }
 
 val LocalSpacing = compositionLocalOf { Spacing() }

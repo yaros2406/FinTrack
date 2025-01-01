@@ -9,6 +9,9 @@ data class ChartData(
 )
 
 fun getChartDataForPeriod(): ChartData {
+
+    /* It's assumed that there're all the results of computations with incoming data. */
+
     return ChartData(
         points = listOf(
             Offset(0.18f, 0.7f),
